@@ -4,5 +4,5 @@ import lombok.Data;
 
 @Data
 public class Point {
-    final private int x ,y;
+  final private int x, y;
 }
