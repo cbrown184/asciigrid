@@ -2,6 +2,7 @@
  
 Draw straight & diagonal lines using ascii. Diagonal lines are raster based using [Bresenham's line algorithm.](https://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm#Java) 
 
+
 ## Commands
 **C w h** Create a new canvas of width w and height h
 
@@ -14,7 +15,7 @@ Draw straight & diagonal lines using ascii. Diagonal lines are raster based usin
 
 ## Getting Started
 
-download jar
+If you want to run this project inside Eclipse or IntelliJ you will need to first install the [Lombok](https://projectlombok.org/setup/overview) plugin.
 
 Build jar
 ```
@@ -23,6 +24,7 @@ $ gradle build
 BUILD SUCCESSFUL in 14s
 5 actionable tasks: 5 executed
 ```
+
 
 Run jar
 ```
@@ -173,56 +175,116 @@ r 0 0 50 50
 ```
 
 
-## Running the tests
 
-Explain how to run the automated tests for this system
 
-### Break down into end to end tests
+### Tests
 
-Explain what these tests test and why
+***gradle clean test -i***
 
+componenttests.ListGridTests are responsible for testing the canvas representation (ListGridImpl), the underlying data structure is a 2-d array implemented as a 2d ArrayList of generic type <T>. These tests ensure the ListGridImpl is creating, persisting and manipulating the grid correctly.
 ```
-Give an example
+ @Test
+  public void listGridDefaultElementsAreCorrect() {
+    //Given a type and default value
+    ListGridImpl<Integer> grid = new ListGridImpl<>();
+    grid.setNewGrid(100, 100, 1);
+    //Then there should be 10,000 grid squares which are equal to 1
+    Assert.assertEquals(10000, grid.noGridSquares());
+    grid.getGrid().stream().flatMap(List::stream).forEach(
+        integer -> Assert.assertEquals(Integer.valueOf(1), integer));
+  }
 ```
 
-### And coding style tests
-
-Explain what these tests test and why
-
+componenttests.BresenhamLineCalculatorTests are responsible for testing the straight line calculations made when given 2 points.
 ```
-Give an example
+  @Test
+  public void horizontalLineTestRight() {
+    Point a = new Point(0, 0);
+    Point b = new Point(3, 0);
+    List<Point> line = bresenhamLineCalculator.calculateLine(a, b);
+    Assert.assertEquals(4, line.size());
+    Assert.assertEquals(new Point(0, 0), line.get(0));
+    Assert.assertEquals(new Point(1, 0), line.get(1));
+    Assert.assertEquals(new Point(2, 0), line.get(2));
+    Assert.assertEquals(new Point(3, 0), line.get(3));
+  }
 ```
 
-## Deployment
+servicetests.GridServiceTests are integration tests responsible for testing the drawing functionality as a whole. The tests will print to the canvas which can help detect display problems from eye.
+```
 
-Add additional notes about how to deploy this on a live system
+  @Test
+  public void drawPattern() {
+    //pattern made from rectangles
+    Injector injector = Guice.createInjector(new AsciiGridModule());
+    GridService gridService = injector.getInstance(GridService.class);
+    gridService.createGrid(100, 50);
+    for (int i = 0; i < 50; i += 2) {
+      gridService.drawRec(new Point(0 + i, 0 + i), new Point(99 - i, 49 - i));
+    }
+    System.out.println(gridService.gridToString());
+  }
+  
+------------------------------------------------------------------------------------------------------
+|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+|x                                               xxxx                                               x|
+|x xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx x|
+|x x                                           xxxxxxxx                                           x x|
+|x x xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx x x|
+|x x x                                       xxxxxxxxxxxx                                       x x x|
+|x x x xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx x x x|
+|x x x x                                   xxxxxxxxxxxxxxxx                                   x x x x|
+|x x x x xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx x x x x|
+|x x x x x                               xxxxxxxxxxxxxxxxxxxx                               x x x x x|
+|x x x x x xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx x x x x x|
+|x x x x x x                           xxxxxxxxxxxxxxxxxxxxxxxx                           x x x x x x|
+|x x x x x x xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx x x x x x x|
+|x x x x x x x                       xxxxxxxxxxxxxxxxxxxxxxxxxxxx                       x x x x x x x|
+|x x x x x x x xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx x x x x x x x|
+|x x x x x x x x                   xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                   x x x x x x x x|
+|x x x x x x x x xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx x x x x x x x x|
+|x x x x x x x x x               xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx               x x x x x x x x x|
+|x x x x x x x x x xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx x x x x x x x x x|
+|x x x x x x x x x x           xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx           x x x x x x x x x x|
+|x x x x x x x x x x xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx x x x x x x x x x x|
+|x x x x x x x x x x x       xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx       x x x x x x x x x x x|
+|x x x x x x x x x x x xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx x x x x x x x x x x x|
+|x x x x x x x x x x x x   xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx   x x x x x x x x x x x x|
+|x x x x x x x x x x x x xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx x x x x x x x x x x x x|
+|x x x x x x x x x x x x xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx x x x x x x x x x x x x|
+|x x x x x x x x x x x x   xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx   x x x x x x x x x x x x|
+|x x x x x x x x x x x xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx x x x x x x x x x x x|
+|x x x x x x x x x x x       xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx       x x x x x x x x x x x|
+|x x x x x x x x x x xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx x x x x x x x x x x|
+|x x x x x x x x x x           xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx           x x x x x x x x x x|
+|x x x x x x x x x xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx x x x x x x x x x|
+|x x x x x x x x x               xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx               x x x x x x x x x|
+|x x x x x x x x xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx x x x x x x x x|
+|x x x x x x x x                   xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                   x x x x x x x x|
+|x x x x x x x xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx x x x x x x x|
+|x x x x x x x                       xxxxxxxxxxxxxxxxxxxxxxxxxxxx                       x x x x x x x|
+|x x x x x x xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx x x x x x x|
+|x x x x x x                           xxxxxxxxxxxxxxxxxxxxxxxx                           x x x x x x|
+|x x x x x xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx x x x x x|
+|x x x x x                               xxxxxxxxxxxxxxxxxxxx                               x x x x x|
+|x x x x xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx x x x x|
+|x x x x                                   xxxxxxxxxxxxxxxx                                   x x x x|
+|x x x xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx x x x|
+|x x x                                       xxxxxxxxxxxx                                       x x x|
+|x x xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx x x|
+|x x                                           xxxxxxxx                                           x x|
+|x xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx x|
+|x                                               xxxx                                               x|
+|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+------------------------------------------------------------------------------------------------------
+```
 
-## Built With
-
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
-
-## Contributing
-
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
-
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
-
-## Authors
-
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
-
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-
-## Acknowledgments
-
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
+servicetests.UserInputServiceTests are used to test user input is processed correctly. The UserInputListener is mocked, the tests will pass commands to the UserInputService and verify that only the expected method is invoked in the UserInputListener.
+```
+  @Test
+  public void drawLineCommandTest() {
+    userInputService.command("L 12 13 41 1213");
+    verify(userInputListener, times(1)).drawLineCommand(any(), any());
+    verifyNoMoreInteractions(userInputListener);
+  }
+```
